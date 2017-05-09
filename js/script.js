@@ -78,9 +78,9 @@ function loadData() {
 
                 // finally, append the article to the list
                 $('#nytimes-articles').append(article);
-
-
             })
+        }).fail(function() {
+            $nytHeaderElem.text("NY Times articles couldn't be loaded!");
         });
     }
 
