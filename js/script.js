@@ -14,8 +14,7 @@ function loadData() {
     var cityStr = $('#city').val();
     var address = streetStr + ' ' + cityStr;
 
-    // load streetview
-
+     // load streetview
     function loadStreetView() {
         var streetviewUrl = "http://maps.googleapis.com/maps/api/streetview?size=600x300&location=";
 
@@ -79,15 +78,75 @@ function loadData() {
                 // finally, append the article to the list
                 $('#nytimes-articles').append(article);
             })
-        }).fail(function() {
+        }).fail(function () {
             $nytHeaderElem.text("NY Times articles couldn't be loaded!");
+
         });
     }
 
+    function loadWiki() {
+        function loadArticles(data) {
 
+            var requestWikiTimeout = setTimeout(function () {
+                $wikiElem.text("failed to get Wiki articles!");
+            }, 8000);
+
+            var endpoint = 'https://en.wikipedia.org/w/api.php';
+            var baseUrl = 'https://en.wikipedia.org/ddwiki/';
+
+            var articles = data.query.alllinks;
+
+            var title;
+            var link;
+            var listItem;
+            var tag;
+
+            articles.forEach(function (a) {
+                title = a.title;
+                link = baseUrl + title;
+
+                listItem = document.createElement('li');
+
+                tag = document.createElement('a');
+                tag.href = link;
+                tag.target = '_blank';
+                $(tag).text(title);
+
+                listItem.appendChild(tag);
+
+                $wikiElem.append(listItem);
+            });
+
+            clearTimeout(requestWikiTimeout);
+        };
+
+        var requestData = {
+            action: 'query',
+            list: 'alllinks',
+            format: 'json',
+            alfrom: cityStr,
+            alunique: '',
+            alprop: 'title'
+        };
+
+        var settings = {
+            url: endpoint,
+            dataType: 'jsonp',
+            data: requestData,
+            callback: 'loadArticles',
+            rvprop: 'content'
+        };
+
+        $.ajax(settings)
+            .done(loadArticles)
+            .error(function (e) {
+                console.log(e);
+            });
+    }
 
     loadStreetView();
     loadNYTimes();
+    loadWiki();
 
     return false;
 };
